@@ -220,13 +220,16 @@ void CServer::ProcessData(std::pair<sockaddr_in, std::string> dataItem)
 	}
 	case DATA:
 	{
-		_packetToSend.Serialize(DATA, _packetRecvd.MessageContent);
-		SendData(_packetToSend.PacketData);
+		//_packetToSend.Serialize(DATA, _packetRecvd.MessageContent);
+		//SendData(_packetToSend.PacketData);
 
 		//std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
-		_packetToSend.Serialize(DATA, "TEST MESSAGE");
-		SendData(_packetToSend.PacketData);
+		for (auto& x : *m_pConnectedClients) {
+			_packetToSend.Serialize(DATA, _packetRecvd.MessageContent);
+			SendDataTo(_packetToSend.PacketData, x.second.m_ClientAddress);
+		}
+		
 
 		break;
 	}
