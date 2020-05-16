@@ -209,28 +209,49 @@ void CServer::ProcessData(std::pair<sockaddr_in, std::string> dataItem)
 	case HANDSHAKE:
 	{
 		std::string message = "Users in chatroom : ";
+		std::string failMessage = "A user with that name already exists";
 		std::cout << "Server received a handshake message " << std::endl;
-		if (AddClient(_packetRecvd.MessageContent))
+
+		bool diffName = true;
+
+		for (auto& x : *m_pConnectedClients)
 		{
-			//Qs 3: To DO : Add the code to do a handshake here
-			_packetToSend.Serialize(HANDSHAKE_SUCCESS, const_cast<char*>(message.c_str()));
-			SendDataTo(_packetToSend.PacketData, dataItem.first);
+			if (_packetRecvd.MessageContent == x.second.m_strName)
+			{
+				diffName = false;
+				std::cout << "Client with the same name" << std::endl;
+				_packetToSend.Serialize(HANDSHAKE_SUCCESS, const_cast<char*>(failMessage.c_str()));
+				SendDataTo(_packetToSend.PacketData, dataItem.first);
+				break;
+			}
 		}
+		if (diffName)
+		{
+			if (AddClient(_packetRecvd.MessageContent))
+			{
+				//Qs 3: To DO : Add the code to do a handshake here
+				_packetToSend.Serialize(HANDSHAKE_SUCCESS, const_cast<char*>(message.c_str()));
+				SendDataTo(_packetToSend.PacketData, dataItem.first);
+
+				std::string allClients = "";
+				for (auto& x : *m_pConnectedClients)
+				{
+					allClients += x.second.m_strName + " - ";
+				}
+				_packetToSend.Serialize(HANDSHAKE_SUCCESS, const_cast<char*>(allClients.c_str()));
+				SendDataTo(_packetToSend.PacketData, dataItem.first);
+			}
+		}
+		diffName = true; // Resets for next user that attempts to join
 		break;
 	}
 	case DATA:
 	{
-		//_packetToSend.Serialize(DATA, _packetRecvd.MessageContent);
-		//SendData(_packetToSend.PacketData);
-
-		//std::this_thread::sleep_for(std::chrono::milliseconds(50));
-
-		for (auto& x : *m_pConnectedClients) {
+		for (auto& x : *m_pConnectedClients)
+		{
 			_packetToSend.Serialize(DATA, _packetRecvd.MessageContent);
 			SendDataTo(_packetToSend.PacketData, x.second.m_ClientAddress);
 		}
-		
-
 		break;
 	}
 
