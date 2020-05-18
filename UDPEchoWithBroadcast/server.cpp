@@ -227,20 +227,32 @@ void CServer::ProcessData(std::pair<sockaddr_in, std::string> dataItem)
 		}
 		if (diffName)
 		{
+			std::string joinedMessage = _packetRecvd.MessageContent;
+			joinedMessage += " has joined the server";
+
 			if (AddClient(_packetRecvd.MessageContent))
 			{
-				//Qs 3: To DO : Add the code to do a handshake here
-				_packetToSend.Serialize(HANDSHAKE_SUCCESS, const_cast<char*>(message.c_str()));
-				SendDataTo(_packetToSend.PacketData, dataItem.first);
-
-				std::string allClients = "";
+				// To display all connected users
 				for (auto& x : *m_pConnectedClients)
 				{
-					allClients += x.second.m_strName + " - ";
+					message += x.second.m_strName + ", ";
 				}
-				_packetToSend.Serialize(HANDSHAKE_SUCCESS, const_cast<char*>(allClients.c_str()));
+				_packetToSend.Serialize(HANDSHAKE_SUCCESS, const_cast<char*>(message.c_str()));
 				SendDataTo(_packetToSend.PacketData, dataItem.first);
 			}
+
+
+			// Let other users know that new user joined
+			for (auto& x : *m_pConnectedClients)
+			{
+				if (x.second.m_strName != _packetRecvd.MessageContent)
+				{
+					_packetToSend.Serialize(DATA, const_cast<char*>(joinedMessage.c_str()));
+					SendDataTo(_packetToSend.PacketData, x.second.m_ClientAddress);
+				}
+			}
+
+
 		}
 		diffName = true; // Resets for next user that attempts to join
 		break;
