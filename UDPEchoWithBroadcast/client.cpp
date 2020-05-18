@@ -185,13 +185,14 @@ bool CClient::Initialise()
 	//Send a hanshake message to the server as part of the Client's Initialization process.
 	//Step1: Create a handshake packet
 	
-	do{
+	do
+	{
 		std::cout << "Please enter a username : ";
 		gets_s(_cUserName);
 	} while (_cUserName[0] == 0);
 
 	TPacket _packet;
-	_packet.Serialize(HANDSHAKE, _cUserName); 
+	_packet.Serialize(HANDSHAKE, _cUserName);
 	SendData(_packet.PacketData);
 	return true;
 }
@@ -369,6 +370,29 @@ void CClient::ProcessData(char* _pcDataReceived)
 		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10);
 		std::cout << "SERVER> " << _packetRecvd.MessageContent << std::endl;
 		break;
+	}
+	case SAMENAME: // The user inputs a name that already exists
+	{
+		//Local variable to hold client's name
+		char _cUserName[50];
+		ZeroMemory(&m_cUserName, 50);
+
+		//Zero out the memory for all the member variables.
+		ZeroMemory(&m_cUserName, strlen(m_cUserName));
+
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10);
+		std::cout << "SERVER> " << _packetRecvd.MessageContent << std::endl;
+
+		do
+		{
+			std::cout << "Please enter a unique username : ";
+			gets_s(_cUserName);
+		} while (_cUserName[0] == 0);
+
+		TPacket _packet;
+		_packet.Serialize(HANDSHAKE, _cUserName);
+		SendData(_packet.PacketData);
+
 	}
 	default:
 		break;

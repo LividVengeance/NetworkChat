@@ -25,7 +25,8 @@ enum EMessageType : unsigned char
 	DATA,
 	KEEPALIVE,
 	COMMAND,
-	BROADCAST
+	BROADCAST,
+	SAMENAME
 };
 
 struct TPacket 

@@ -219,8 +219,8 @@ void CServer::ProcessData(std::pair<sockaddr_in, std::string> dataItem)
 			if (_packetRecvd.MessageContent == x.second.m_strName)
 			{
 				diffName = false;
-				std::cout << "Client with the same name" << std::endl;
-				_packetToSend.Serialize(HANDSHAKE_SUCCESS, const_cast<char*>(failMessage.c_str()));
+				std::cout << "Client request existing name" << std::endl;
+				_packetToSend.Serialize(SAMENAME, const_cast<char*>(failMessage.c_str()));
 				SendDataTo(_packetToSend.PacketData, dataItem.first);
 				break;
 			}
